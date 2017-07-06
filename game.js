@@ -31,8 +31,6 @@ var selectedX = -1;
 var selectedY = -1;
 
 
-var background = new Image();
-background.src = "map2.png";
 
 var tiles = new Image();
 tiles.src = "tiles.png";
@@ -162,7 +160,6 @@ function init()
 	clearBtn.addEventListener("click", clearRect, false);
 	
 	getTerrain();
-	drawBg();
 	drawTerrain();
 	drawBuildingsMap();
 	
@@ -297,8 +294,3 @@ function clearRect()
 	ctxMap.clearRect(0, 0, 500, 500);
 }
 
-function drawBg()
-{
-	ctxMap.drawImage(background, 0, 0, 500, 500, 
-	0, 0, gameWidth, gameHeight);
-}
