@@ -1,0 +1,23 @@
+body
+{
+	background: #555;
+}
+
+#buildings_map
+{
+	background: #FFF;
+	display: block;
+	position: fixed;
+	top: 45px;
+	left: 30%;
+	cursor: pointer;
+}
+
+#map, #buildings, #cursor
+{
+	background: transparent;
+	display: block;
+	position: fixed;
+	top: 70px;
+	left: 30%;
+}
