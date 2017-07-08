@@ -30,12 +30,16 @@ var offsetMapTop = 0;
 var selectedX = -1;
 var selectedY = -1;
 
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+window.requestAnimationFrame = requestAnimationFrame;
+
+var currentTime = 0;
 
 
 var tiles = new Image();
 tiles.src = "tiles.png";
 
-var terrainTypes = ["", "forest", "land", "water", "oil", "coal", "gold", "iron"];
+
 var terrain = [];
 
 var buildingTypes = [
@@ -76,7 +80,9 @@ var buildingTypes = [
 ];
 //gold, food, coal, iron, oil, stone, water, wood, electicity
 var resources = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
+var terrainTypes = ["", "forest", "land", "water", "oil", "coal", "gold", "iron"];
+var money = 820000;
+var fps = 20;
 var b = {
 	"buildings":
 	[ 
@@ -85,21 +91,26 @@ var b = {
 		},
 		{
 			"name": "city",
-			"buildTime": 360,
+			"type": 1,
+			"buildTime": 30,
 			"buildOn": 2,
 			"countHomes": 50,
 			"life": -1,
 			"cost": 1450000,
 			"status": "build",
-			"workON": [],
+			"workON": ["summer", "autumn", "winter", "spring"],
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
 			"workers": 0,
 			"countWorkers": 0,
 			"x": -1,
-			"y": -1
+			"y": -1,
+			"opacity": 0.1
 		},
 		{
 			"name": "farm",
-			"buildTime": 38,
+			"type": 2,
+			"buildTime": 8,
 			"buildOn": 0,
 			"countHomes": 0,
 			"life": 8640,
@@ -109,22 +120,279 @@ var b = {
 			"workers": 5,
 			"countWorkers": 0,
 			"consumption": [0, 0, 0, 0, 0, 0, 2, 0, 0],
-			"profit": [0, 32, 0, 0, 0, 0, 2, 0, 0],
+			"profit": [0, 32, 0, 0, 0, 0, 0, 0, 0],
 			"x": -1,
-			"y": -1
-		}
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "garden",
+			"type": 3,
+			"buildTime": 20,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 12960,
+			"cost": 7640,
+			"status": "build",
+			"workON": ["summer", "autumn"],
+			"workers": 2,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 1, 0, 0],
+			"profit": [0, 18, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "watercanal",
+			"type": 4,
+			"buildTime": 8,
+			"buildOn": 3,
+			"countHomes": 0,
+			"life": 4320,
+			"cost": 18310,
+			"status": "build",
+			"workON": ["summer", "autumn", "spring"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 7, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "sawmill",
+			"type": 5,
+			"buildTime": 6,
+			"buildOn": 1,
+			"countHomes": 0,
+			"life": 3650,
+			"cost": 17570,
+			"status": "build",
+			"workON": ["summer", "autumn", "spring", "winter"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 1, 2, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 15, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "mine",
+			"type": 6,
+			"buildTime": 68,
+			"buildOn": 5,
+			"countHomes": 0,
+			"life": 5760,
+			"cost": 25471,
+			"status": "build",
+			"workON": ["summer", "autumn", "spring", "winter"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 5, 1],
+			"profit": [0, 0, 2, 0, 19, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "career",
+			"type": 7,
+			"buildTime": 68,
+			"buildOn": 7,
+			"countHomes": 0,
+			"life": 5040,
+			"cost": 25471,
+			"status": "build",
+			"workON": ["summer", "autumn", "spring"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 9, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 9, 0, 9, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "oil-production",
+			"type": 8,
+			"buildTime": 25,
+			"buildOn": 4,
+			"countHomes": 0,
+			"life": 4320,
+			"cost": 82684,
+			"status": "build",
+			"workON": ["summer"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 10, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "gold-mine",
+			"type": 9,
+			"buildTime": 8,
+			"buildOn": 6,
+			"countHomes": 0,
+			"life": 3650,
+			"cost": 77000,
+			"status": "build",
+			"workON": ["summer"],
+			"workers": 30,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 200, 0, 0],
+			"profit": [2, 0, 0, 0, 0, 70, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "electrostation",
+			"type": 10,
+			"buildTime": 65,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 17280,
+			"cost": 92433,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 5,
+			"countWorkers": 0,
+			"consumption": [0, 0, 10, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 10],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "hydrostation",
+			"type": 11,
+			"buildTime": 100,
+			"buildOn": 3,
+			"countHomes": 0,
+			"life": 14400,
+			"cost": 92214,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 5,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 1],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
 	]
 };
 
-
-
-
 var buildings_ = [];
-
-
-
-
 var mapArray;
+
+
+function Building (name, type, buildTime, buildOn, countHomes, life, cost, workOn, workers, countWorkers, consumption, profit, x, y) {
+    this.name = name;
+    this.type = type;
+	this.buildTime = buildTime;
+	this.buildOn = buildOn;
+	this.countHomes = countHomes;
+	this.life = life;
+	this.cost = cost;
+	this.workOn = workOn;
+	this.workers = workers;
+	this.countWorkers = countWorkers;
+	this.consumption = consumption;
+	this.profit = profit;
+	this.x = x;
+	this.y = y;
+	this.opacity = 0.1;
+	this.status;
+}
+
+Building.prototype = {
+    checkStatus: function(){
+
+		if (this.buildTime == 0) this.changeStatus("work");
+		if (this.status == "build") this.buildTime -=1;
+	},
+	changeStatus: function ( status ) {
+		this.status = status;
+		this.drawStatus();
+		
+	},
+	work: function()
+	{
+		if (this.status == "work")
+		{
+			var temp_res = resources;
+			for (var i = 0; i < this.consumption.length; i++)
+				if (temp_res[i] - this.consumption[i] >= 0)
+					temp_res[i] -= this.consumption[i];
+				else
+					{
+						this.changeStatus("no_resource");
+					}
+		}
+		
+		if (this.status == "work")
+		{
+			for (var i = 0; i < this.consumption.length; i++)
+				if (resources[i] - this.consumption[i] >= 0)
+					resources[i] -= this.consumption[i];
+			
+			for (var i = 0; i < this.profit.length; i++)
+				resources[i] += getRandomInt(this.profit[i] * 0.85, this.profit[i] * 1.15);
+			
+			setResources();
+		}
+	},
+	drawStatus: function() {
+		
+		if (this.status == "build")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'yellow';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
+		
+		if (this.status == "work")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'green';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
+		
+		if (this.status == "no_resource")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'red';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
+		
+		
+		
+	}
+};
+
+function getRandomInt(min, max) {
+  return parseInt(Math.floor(Math.random() * (max - min)) + min);
+}
 
 function init()
 {
@@ -148,8 +416,6 @@ function init()
 	buildings_map.width = 825;
 	buildings_map.height = 25;
 	
-	
-	
 	offsetMapLeft = map.offsetLeft;
 	offsetMapTop = map.offsetTop;
 	
@@ -158,6 +424,8 @@ function init()
 	
 	drawBtn.addEventListener("click", drawRect, false);
 	clearBtn.addEventListener("click", clearRect, false);
+	
+	setResources();
 	
 	getTerrain();
 	drawTerrain();
@@ -188,8 +456,90 @@ function init()
 	
 	window.addEventListener( "keydown", doKeyDown, true);
 	
-	
+	setInterval(function() {
+		setTime();
+		update();
+	}, 300);
 
+}
+
+function sell(obj)
+{
+	if (obj.id == "gold")
+	{
+		money += 1000* parseInt(obj.innerHTML);
+		resources[0] = 0;
+	}
+	
+	if (obj.id == "food")
+	{
+		money += parseInt(obj.innerHTML);
+		resources[1] = 0;
+	}	
+		
+	if (obj.id == "coal")
+	{
+		money += 30 * parseInt(obj.innerHTML);
+		resources[2] = 0;
+	}
+	
+	if (obj.id == "iron")
+	{
+		money += 50 * parseInt(obj.innerHTML);
+		resources[3] = 0;
+	}
+
+	if (obj.id == "oil")
+	{
+		money += 45 * parseInt(obj.innerHTML);
+		resources[4] = 0;
+	}
+		
+	if (obj.id == "stone")
+	{
+		money += 4 * parseInt(obj.innerHTML);
+		resources[5] = 0;
+	}
+		
+	if (obj.id == "water")
+	{
+		money += 5 * parseInt(obj.innerHTML);
+		resources[6] = 0;
+	}
+	
+	if (obj.id == "wood")
+	{
+		money += 12 * parseInt(obj.innerHTML);
+		resources[7] = 0;
+	}
+		
+	if (obj.id == "electricity")
+	{
+		money += 35 * parseInt(obj.innerHTML);
+		resources[8] = 0;
+	}
+		
+	
+}
+
+function setResources()
+{
+	document.getElementById("gold").innerHTML = resources[0];
+	document.getElementById("food").innerHTML = resources[1];
+	document.getElementById("coal").innerHTML = resources[2];
+	document.getElementById("iron").innerHTML = resources[3];
+	document.getElementById("oil").innerHTML = resources[4];
+	document.getElementById("stone").innerHTML = resources[5];
+	document.getElementById("water").innerHTML = resources[6];
+	document.getElementById("wood").innerHTML = resources[7];
+	document.getElementById("electricity").innerHTML = resources[8];
+	document.getElementById("money").innerHTML = money;
+}
+
+function setTime()
+{
+	currentTime += 1;
+	document.getElementById("time").innerHTML = currentTime;
 }
 
 function doKeyDown(e) {
@@ -247,16 +597,36 @@ function selectTile(x, y)
 
 function setupBuilding(index)
 {
-	var build = b.buildings[index];
-	if (getTerrainType(selectedX, selectedY) == build.buildOn)
+	if 
+	(
+		(getTerrainType(selectedX, selectedY) == b.buildings[index].buildOn || b.buildings[index].buildOn == 0) && 
+		(ifFree(selectedX, selectedY)) &&
+		(b.buildings[index].cost < money)
+	)
 	{
-		ctxBuildings.drawImage(tiles, (index - 1) * tileWidth, tileWidth, tileWidth, tileWidth, selectedX * tileWidth, selectedY * tileHeight, 25, 25);	
+		money -= b.buildings[index].cost;
+		setResources();
 		
-		build.x = selectedX;
-		build.y = selectedY;
+		var b_ = b.buildings[index];
+		var build = new Building(b_.name, b_.type, b_.buildTime, b_.buildOn, b_.countHomes, b_.life, b_.cost, b_.workON, b_.workers, b_.countWorkers, b_.consumption, b_.profit, selectedX, selectedY);
+		
 		buildings_.push(build);
-		console.log(buildings_);
+		animateFade( build );
+		setTimeout(function() { build.changeStatus("build"); }, 1000);
 	}
+}
+
+function ifFree(X, Y)
+{
+
+	var b = _.chain(buildings_).where({
+		x: X,
+		y: Y
+	}).map(function (obj) {
+		return obj.name
+	});
+
+	return (b.value().length == 0) ? true : false;
 }
 
 function getTerrain()
@@ -294,3 +664,34 @@ function clearRect()
 	ctxMap.clearRect(0, 0, 500, 500);
 }
 
+function animateFade( build )
+{
+	setTimeout(function() {
+			if(build.opacity > 1){ return; } 
+			requestAnimationFrame( function() { animateFade( build ); }); 
+			ctxBuildings.clearRect(build.x * tileWidth, build.y * tileHeight, 25, 25);
+			draw( build );
+			build.opacity += 0.1;
+	}, 1000 / fps);
+}
+
+function draw( build ){
+	ctxBuildings.save();
+	ctxBuildings.globalAlpha = build.opacity;
+	ctxBuildings.drawImage(tiles, (build.type - 1) * tileWidth, tileWidth, tileWidth, tileWidth, build.x * tileWidth, build.y * tileHeight, 25, 25);
+	ctxBuildings.restore();
+}
+
+
+function update()
+{
+	buildings_.forEach(
+		function(element) 
+		{
+			element.checkStatus();
+			element.work();
+		}
+	); 
+
+
+}

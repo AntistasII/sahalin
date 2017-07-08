@@ -21,3 +21,10 @@ body
 	top: 70px;
 	left: 30%;
 }
+
+#stats
+{
+	background: #FFF;
+	color: #000;
+	width: 200px;
+}

@@ -11,9 +11,24 @@
 		<canvas id = "buildings_map"></canvas>
 		<canvas id = "map"></canvas>
 		<canvas id = "buildings"></canvas>
+
 		<canvas id = "cursor"></canvas>
 		
 		<input id = "drawBtn" type = "button" value = "Draw">
 		<input id = "clearBtn" type = "button" value = "Clear">
+		
+		<div id = "stats">
+			<p> Золото: <span id = "gold" onclick = "sell(this)"></span></p>
+			<p> Еда: <span id = "food" onclick = "sell(this)"></span></p>
+			<p> Уголь: <span id = "coal" onclick = "sell(this)"></span></p>
+			<p> Железо: <span id = "iron" onclick = "sell(this)"></span></p>
+			<p> Нефть: <span id = "oil" onclick = "sell(this)"></span></p>
+			<p> Камень: <span id = "stone" onclick = "sell(this)"></span></p>
+			<p> Вода: <span id = "water" onclick = "sell(this)"></span></p>
+			<p> Дерево: <span id = "wood" onclick = "sell(this)"></span></p>
+			<p> Электричество: <span id = "electricity" onclick = "sell(this)"></span></p>
+			<p> Текущее время: <span id = "time"></span></p>
+			<p> Деньги: <span id = "money"></span></p>
+		</div>
 	</body>
 </html>
