@@ -8,10 +8,10 @@
 		<link rel = "stylesheet" href = "style.css">
 	</head>
 	<body>
+		<canvas id = "background"></canvas>
 		<canvas id = "buildings_map"></canvas>
 		<canvas id = "map"></canvas>
 		<canvas id = "buildings"></canvas>
-
 		<canvas id = "cursor"></canvas>
 		
 		<input id = "drawBtn" type = "button" value = "Draw">
@@ -29,6 +29,13 @@
 			<p> Электричество: <span id = "electricity" onclick = "sell(this)"></span></p>
 			<p> Текущее время: <span id = "time"></span></p>
 			<p> Деньги: <span id = "money"></span></p>
+			
+			<p> Работающие: <span id = "working"></span></p>
+			<p> Безработные: <span id = "not_working"></span></p>
+			
+		</div>
+		
+		<div id = "events">
 		</div>
 	</body>
 </html>

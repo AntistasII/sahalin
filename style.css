@@ -1,6 +1,6 @@
 body
 {
-	background: #555;
+	background: rgb(133, 207, 228);
 }
 
 #buildings_map
@@ -8,9 +8,18 @@ body
 	background: #FFF;
 	display: block;
 	position: fixed;
-	top: 45px;
+	top: 40px;
 	left: 30%;
 	cursor: pointer;
+}
+
+#background
+{
+	position: fixed;
+	top: 120px;
+	left: calc(30% - 50px);
+	/*background: rgb(230, 234, 147);*/
+	/*border: 1px solid black;*/
 }
 
 #map, #buildings, #cursor
@@ -18,7 +27,7 @@ body
 	background: transparent;
 	display: block;
 	position: fixed;
-	top: 70px;
+	top: 170px;
 	left: 30%;
 }
 
@@ -27,4 +36,13 @@ body
 	background: #FFF;
 	color: #000;
 	width: 200px;
+}
+
+#events
+{
+	width: 200px;
+	height: 300px;
+	overflow: scroll;
+	background: #FFF;
+	color: #000;
 }

@@ -8,6 +8,9 @@ var ctxBuildings;
 var cursor;
 var ctxCursor;
 
+var background;
+var ctxBackground;
+
 
 var buildings_map;
 var ctxBuildings_map;
@@ -15,14 +18,13 @@ var ctxBuildings_map;
 var drawBtn;
 var clearBtn;
 
-var gameWidth = 500;
-var gameHeight = 500;
+var gameWidth = gameHeight =  600;
 
 var tileWidth = 25;
 var tileHeight = 25;
 
-var tilesInMapX = 20;
-var tilesInMapY = 20;
+var tilesInMapX = parseInt(gameWidth / tileWidth);
+var tilesInMapY = parseInt(gameHeight / tileHeight);
 
 var offsetMapLeft = 0;
 var offsetMapTop = 0;
@@ -35,9 +37,11 @@ window.requestAnimationFrame = requestAnimationFrame;
 
 var currentTime = 0;
 
-
 var tiles = new Image();
-tiles.src = "tiles.png";
+tiles.src = "tiles3.png";
+
+var workingPeople = 0;
+var noWorkingPeople = 50;
 
 
 var terrain = [];
@@ -293,6 +297,12 @@ var b = {
 var buildings_ = [];
 var mapArray;
 
+function log( s )
+{
+	var p = document.createElement('p');
+	p.innerHTML = s;
+	document.getElementById("events").appendChild(p);
+}
 
 function Building (name, type, buildTime, buildOn, countHomes, life, cost, workOn, workers, countWorkers, consumption, profit, x, y) {
     this.name = name;
@@ -316,38 +326,62 @@ function Building (name, type, buildTime, buildOn, countHomes, life, cost, workO
 Building.prototype = {
     checkStatus: function(){
 
-		if (this.buildTime == 0) this.changeStatus("work");
-		if (this.status == "build") this.buildTime -=1;
+		if (this.status == "build") 
+			if (this.buildTime == 0) 
+				this.changeStatus("work");
+			else
+				this.buildTime -=1;
 	},
 	changeStatus: function ( status ) {
+		
 		this.status = status;
 		this.drawStatus();
 		
 	},
 	work: function()
 	{
-		if (this.status == "work")
+		if (this.status != "build") 
 		{
-			var temp_res = resources;
-			for (var i = 0; i < this.consumption.length; i++)
-				if (temp_res[i] - this.consumption[i] >= 0)
-					temp_res[i] -= this.consumption[i];
+			if ( this.countWorkers == 0 )
+				if  (noWorkingPeople >= this.workers)
+				{
+					this.countWorkers = this.workers;
+					workingPeople += this.countWorkers;
+					noWorkingPeople -= this.countWorkers;
+					this.changeStatus("work");
+				}
 				else
-					{
-						this.changeStatus("no_resource");
-					}
-		}
-		
-		if (this.status == "work")
-		{
-			for (var i = 0; i < this.consumption.length; i++)
-				if (resources[i] - this.consumption[i] >= 0)
-					resources[i] -= this.consumption[i];
+				{
+					log( noWorkingPeople + " " +  this.workers + " " + this.name);
+					this.changeStatus("no_people");
+				}
+	
+				if (this.status == "work" || this.status == "no_resource") 
+				{
+					var temp_res = resources;
+					var temp_count = 0;
+					for (var i = 0; i < this.consumption.length; i++)
+						if (temp_res[i] - this.consumption[i] >= 0)
+							temp_count++;
+						else
+							this.changeStatus("no_resource");	
+					
+					if (temp_count == this.consumption.length)
+						if (this.status == "no_resource")
+							this.changeStatus("work");
+				}
 			
-			for (var i = 0; i < this.profit.length; i++)
-				resources[i] += getRandomInt(this.profit[i] * 0.85, this.profit[i] * 1.15);
-			
-			setResources();
+			if (this.status == "work")
+			{
+				for (var i = 0; i < this.consumption.length; i++)
+					if (resources[i] - this.consumption[i] >= 0)
+						resources[i] -= this.consumption[i];
+				
+				for (var i = 0; i < this.profit.length; i++)
+					resources[i] += getRandomInt(this.profit[i] * 0.85, this.profit[i] * 1.15);
+				
+				setResources();
+			}
 		}
 	},
 	drawStatus: function() {
@@ -385,6 +419,17 @@ Building.prototype = {
 			ctxBuildings.stroke();
 		}
 		
+		if (this.status == "no_people")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'orange';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
+		
 		
 		
 	}
@@ -400,6 +445,11 @@ function init()
 	ctxMap = map.getContext("2d");
 	map.width = gameWidth;
 	map.height = gameHeight;
+	
+	background = document.getElementById("background");
+	ctxBackground = background.getContext("2d");
+	background.width = gameWidth + 100;
+	background.height = gameHeight + 100;
 	
 	buildings = document.getElementById("buildings");
 	ctxBuildings = buildings.getContext("2d");
@@ -424,6 +474,8 @@ function init()
 	
 	drawBtn.addEventListener("click", drawRect, false);
 	clearBtn.addEventListener("click", clearRect, false);
+	
+	drawBorder();
 	
 	setResources();
 	
@@ -462,6 +514,53 @@ function init()
 	}, 300);
 
 }
+
+function drawBorder()
+{
+	ctxBackground.beginPath();
+	ctxBackground.moveTo(10, 10);
+	
+	
+	for (var i = 0; i < (parseInt(gameWidth / 100)) + 1; i++)
+	{
+		var j = 0;
+		(i % 2 == 0) ? j = 0 : j = 40;
+		ctxBackground.quadraticCurveTo((i + 1) * 100 - 50, j, (i + 1) * 100,  10 );
+	}
+	
+	for (var i = 0; i < (parseInt(gameHeight / 100)) + 1; i++)
+	{
+		var j = 0;
+		(i % 2 == 0) ? j = gameHeight + 80 : j = gameHeight + 100;
+		
+		ctxBackground.quadraticCurveTo(j, (i + 1) * 100 - 50, gameHeight + 90,  (i + 1) * 100 );
+	}
+	
+	for (var i = 0; i < (parseInt(gameWidth / 100))  ; i++)
+	{
+		var j = 0;
+		(i % 2 == 0) ? j = gameHeight + 70 : j = gameHeight + 100;
+
+		ctxBackground.quadraticCurveTo(gameWidth - (i + 1) * 100 + 50, j, gameWidth - (i + 1) * 95,  gameHeight + 80 );
+	}
+	
+	for (var i = 0; i < (parseInt(gameHeight / 100)) - 1; i++)
+	{
+		var j = 0;
+		(i % 2 == 0) ? j = 0 : j = 40;
+		
+		ctxBackground.quadraticCurveTo(j, gameHeight - (i + 1) * 100 + 50, 10,  gameHeight - (i + 1) * 100 );
+	}
+	
+	//ctxBackground.quadraticCurveTo(150,0,200,10);
+
+	ctxBackground.strokeStyle = 'black';
+	ctxBackground.closePath();
+	ctxBackground.stroke();
+	ctxBackground.fillStyle = "#e6ea93";
+	ctxBackground.fill();
+}
+
 
 function sell(obj)
 {
@@ -534,6 +633,9 @@ function setResources()
 	document.getElementById("wood").innerHTML = resources[7];
 	document.getElementById("electricity").innerHTML = resources[8];
 	document.getElementById("money").innerHTML = money;
+	
+	document.getElementById("working").innerHTML = workingPeople;
+	document.getElementById("not_working").innerHTML = noWorkingPeople;
 }
 
 function setTime()
@@ -586,7 +688,7 @@ function selectTile(x, y)
 {
 	if ((x >= 0) && (x < tilesInMapX) && (y >= 0) && (y < tilesInMapY))
 	{
-		ctxCursor.clearRect(0, 0, 500, 500);
+		ctxCursor.clearRect(0, 0, gameWidth, gameHeight);
 		ctxCursor.strokeStyle = "#0000ff";
 		ctxCursor.strokeRect(x * 25, y * 25, 25, 25);
 		selectedX = x;
@@ -609,10 +711,8 @@ function setupBuilding(index)
 		
 		var b_ = b.buildings[index];
 		var build = new Building(b_.name, b_.type, b_.buildTime, b_.buildOn, b_.countHomes, b_.life, b_.cost, b_.workON, b_.workers, b_.countWorkers, b_.consumption, b_.profit, selectedX, selectedY);
-		
-		buildings_.push(build);
 		animateFade( build );
-		setTimeout(function() { build.changeStatus("build"); }, 1000);
+		setTimeout(function() { build.changeStatus("build"); buildings_.push(build); }, 1000);
 	}
 }
 
@@ -634,7 +734,11 @@ function getTerrain()
 	for (var i = 1; i <= tilesInMapX; i++)
 		for (var j = 1; j <= tilesInMapY; j++)
 		{
-			var type =  Math.floor(Math.random() * 7) + 1;
+			if (Math.floor(Math.random() * 10) + 1 > 5)
+				var type =  Math.floor(Math.random() * 7) + 1;
+			else
+				var type = 2;
+				
 			var obj = {x: i - 1, y: j - 1, type: type};
 			terrain.push(obj);
 		}
@@ -682,9 +786,17 @@ function draw( build ){
 	ctxBuildings.restore();
 }
 
+function makeEvents()
+{
+	//if getRandomInt(min, max)
+	
+	if ( (currentTime % 30 == 0) && currentTime >= 30) noWorkingPeople += getRandomInt(0, 20);
+	
+}
 
 function update()
 {
+	makeEvents();
 	buildings_.forEach(
 		function(element) 
 		{
@@ -692,6 +804,8 @@ function update()
 			element.work();
 		}
 	); 
+	
+	setResources();
 
 
 }
