@@ -5,17 +5,19 @@
 		<title>Game</title>
 		<script src = "game.js"></script>
 		<script src = "http://underscorejs.org/underscore.js"></script>
+		<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<link rel = "stylesheet" href = "style.css">
 	</head>
 	<body>
-		<canvas id = "background"></canvas>
-		<canvas id = "buildings_map"></canvas>
-		<canvas id = "map"></canvas>
-		<canvas id = "buildings"></canvas>
-		<canvas id = "cursor"></canvas>
-		
-		<input id = "drawBtn" type = "button" value = "Draw">
-		<input id = "clearBtn" type = "button" value = "Clear">
+		<!--<div class = "canvas">-->
+			<canvas id = "background"></canvas>
+			<canvas id = "buildings_map"></canvas>
+			<canvas id = "map"></canvas>
+			<canvas id = "buildings"></canvas>
+			<canvas id = "cursor"></canvas>
+			<div id = "tooltip"></div>
+	
 		
 		<div id = "stats">
 			<p> Золото: <span id = "gold" onclick = "sell(this)"></span></p>
@@ -32,7 +34,7 @@
 			
 			<p> Работающие: <span id = "working"></span></p>
 			<p> Безработные: <span id = "not_working"></span></p>
-			
+			<p> Жилье: <span id = "count_homes"></span></p>
 		</div>
 		
 		<div id = "events">

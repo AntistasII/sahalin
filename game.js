@@ -15,8 +15,9 @@ var ctxBackground;
 var buildings_map;
 var ctxBuildings_map;
 
-var drawBtn;
-var clearBtn;
+
+var tooltip;
+var ctxTooltip;
 
 var gameWidth = gameHeight =  600;
 
@@ -35,14 +36,18 @@ var selectedY = -1;
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 window.requestAnimationFrame = requestAnimationFrame;
 
-var currentTime = 0;
+//var currentTime = 0;
+var day = 1;
+var month = 1;
+var year = 1000;
+var currentSeason = "winter";
 
 var tiles = new Image();
-tiles.src = "tiles3.png";
+tiles.src = "tiles4.png";
 
 var workingPeople = 0;
-var noWorkingPeople = 50;
-
+var noWorkingPeople = 0;
+var countHomes = 0;
 
 var terrain = [];
 
@@ -291,6 +296,204 @@ var b = {
 			"y": -1,
 			"opacity": 0.1
 		},
+		{
+			"name": "road",
+			"type": 12,
+			"buildTime": 7,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 0,
+			"cost": 400,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 0,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "house",
+			"type": 13,
+			"buildTime": 26,
+			"buildOn": 2,
+			"countHomes": 60,
+			"life": 19440,
+			"cost": 14038,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 0,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "hut",
+			"type": 14,
+			"buildTime": 8,
+			"buildOn": 3,
+			"countHomes": 20,
+			"life": 5760,
+			"cost": 30202,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 0,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "pier",
+			"type": 15,
+			"buildTime": 18,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 5760,
+			"cost": 5900,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 2, 0],
+			"profit": [0, 60, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "coal-mine",
+			"type": 16,
+			"buildTime": 12,
+			"buildOn": 5,
+			"countHomes": 0,
+			"life": 15120,
+			"cost": 48300,
+			"status": "build",
+			"workON": ["summer","autumn"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 10, 0, 0, 0, 0],
+			"profit": [0, 0, 15, 0, 0, 19, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "hunting-grounds",
+			"type": 17,
+			"buildTime": 9,
+			"buildOn": 1,
+			"countHomes": 0,
+			"life": 5040,
+			"cost": 16985,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 5,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 10, 0, 1, 0],
+			"profit": [0, 75, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "cattle-farm",
+			"type": 18,
+			"buildTime": 45,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 5760,
+			"cost": 32002,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 10,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 1, 1, 1, 0],
+			"profit": [0, 56, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "mushroom-farm",
+			"type": 19,
+			"buildTime": 8,
+			"buildOn": 1,
+			"countHomes": 0,
+			"life": 4320,
+			"cost": 12164,
+			"status": "build",
+			"workON": ["autumn"],
+			"workers": 5,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 70, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "residential-area",
+			"type": 20,
+			"buildTime": 100,
+			"buildOn": 2,
+			"countHomes": 200,
+			"life": 27360,
+			"cost": 66400,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 0,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "household",
+			"type": 21,
+			"buildTime": 80,
+			"buildOn": 2,
+			"countHomes": 0,
+			"life": 11520,
+			"cost": 380385,
+			"status": "build",
+			"workON": ["summer", "winter", "autumn", "spring"],
+			"workers": 70,
+			"countWorkers": 0,
+			"consumption": [0, 0, 1, 1, 1, 1, 1, 1, 1],
+			"profit": [0, 400, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		},
+		{
+			"name": "bee-garden",
+			"type": 22,
+			"buildTime": 25,
+			"buildOn": 0,
+			"countHomes": 0,
+			"life": 3650,
+			"cost": 9385,
+			"status": "build",
+			"workON": ["summer", "autumn", "spring"],
+			"workers": 5,
+			"countWorkers": 0,
+			"consumption": [0, 0, 0, 0, 0, 0, 0, 1, 0],
+			"profit": [0, 36, 0, 0, 0, 0, 0, 0, 0],
+			"x": -1,
+			"y": -1,
+			"opacity": 0.1
+		}
 	]
 };
 
@@ -342,7 +545,16 @@ Building.prototype = {
 	{
 		if (this.status != "build") 
 		{
-			if ( this.countWorkers == 0 )
+			if (this.workOn.indexOf(currentSeason) == -1)
+				{
+					this.changeStatus("freeze");
+				}
+			else
+				this.changeStatus("work");
+				
+			console.log(this.workOn);
+		
+			if ( this.countWorkers == 0 && this.status != "freeze")
 				if  (noWorkingPeople >= this.workers)
 				{
 					this.countWorkers = this.workers;
@@ -355,21 +567,24 @@ Building.prototype = {
 					log( noWorkingPeople + " " +  this.workers + " " + this.name);
 					this.changeStatus("no_people");
 				}
+				
+			
+			
 	
-				if (this.status == "work" || this.status == "no_resource") 
-				{
-					var temp_res = resources;
-					var temp_count = 0;
-					for (var i = 0; i < this.consumption.length; i++)
-						if (temp_res[i] - this.consumption[i] >= 0)
-							temp_count++;
-						else
-							this.changeStatus("no_resource");	
-					
-					if (temp_count == this.consumption.length)
-						if (this.status == "no_resource")
-							this.changeStatus("work");
-				}
+			if (this.status == "work" || this.status == "no_resource") 
+			{
+				var temp_res = resources;
+				var temp_count = 0;
+				for (var i = 0; i < this.consumption.length; i++)
+					if (temp_res[i] - this.consumption[i] >= 0)
+						temp_count++;
+					else
+						this.changeStatus("no_resource");	
+				
+				if (temp_count == this.consumption.length)
+					if (this.status == "no_resource")
+						this.changeStatus("work");
+			}
 			
 			if (this.status == "work")
 			{
@@ -430,6 +645,17 @@ Building.prototype = {
 			ctxBuildings.stroke();
 		}
 		
+		if (this.status == "freeze")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'blue';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
+		
 		
 		
 	}
@@ -461,6 +687,8 @@ function init()
 	cursor.width = gameWidth;
 	cursor.height = gameHeight;
 	
+	tooltip = document.getElementById("tooltip");
+	
 	buildings_map = document.getElementById("buildings_map");
 	ctxBuildings_map = buildings_map.getContext("2d");
 	buildings_map.width = 825;
@@ -469,11 +697,7 @@ function init()
 	offsetMapLeft = map.offsetLeft;
 	offsetMapTop = map.offsetTop;
 	
-	drawBtn = document.getElementById("drawBtn");
-	clearBtn = document.getElementById("clearBtn");
-	
-	drawBtn.addEventListener("click", drawRect, false);
-	clearBtn.addEventListener("click", clearRect, false);
+
 	
 	drawBorder();
 	
@@ -506,12 +730,35 @@ function init()
 	
 	}, false);
 	
+	buildings_map.addEventListener('mousemove', function(event) {
+    var x = event.pageX - offsetMapLeft,
+        y = event.pageY - offsetMapTop;
+
+	var X = parseInt(x / 25);
+	var Y = parseInt(y / 25);
+	
+	log(event.pageX + " " + event.pageY);
+	tooltip.style.left = event.pageX + "px";
+    tooltip.style.top = event.pageY + 40 + "px";
+    tooltip.style.position = "absolute";
+	tooltip.style.width = 200 + "px";
+	tooltip.style.height = 50 + "px";
+	tooltip.style.display = "block";
+	tooltip.innerHTML = "<p>" + b.buildings[X + 1].name + "</p>";
+	
+
+	}, false);
+	
+	buildings_map.addEventListener('mouseleave', function(event) {
+		 tooltip.style.display = "none";
+	});
+	
 	window.addEventListener( "keydown", doKeyDown, true);
 	
 	setInterval(function() {
 		setTime();
 		update();
-	}, 300);
+	}, 100);
 
 }
 
@@ -557,10 +804,10 @@ function drawBorder()
 	ctxBackground.strokeStyle = 'black';
 	ctxBackground.closePath();
 	ctxBackground.stroke();
-	ctxBackground.fillStyle = "#e6ea93";
+	//ctxBackground.fillStyle = "#e6ea93";'
+	ctxBackground.fillStyle = "#f6f9c5";
 	ctxBackground.fill();
 }
-
 
 function sell(obj)
 {
@@ -636,12 +883,28 @@ function setResources()
 	
 	document.getElementById("working").innerHTML = workingPeople;
 	document.getElementById("not_working").innerHTML = noWorkingPeople;
+	document.getElementById("count_homes").innerHTML = countHomes;
 }
 
 function setTime()
 {
-	currentTime += 1;
-	document.getElementById("time").innerHTML = currentTime;
+	//currentTime += 1;
+	day += 1;
+	if (day == 31) { day = 1; month += 1;}
+	if (month == 13) { year += 1; month = 1; }
+	
+	if (month >= 3 && month <= 5) 
+		currentSeason = "spring";
+	else
+		if (month >= 6 && month <= 8) 
+			currentSeason = "summer";
+		else
+			if (month >= 9 && month <= 11) 
+				currentSeason = "autumn";
+			else
+				currentSeason = "winter";
+	
+	document.getElementById("time").innerHTML = day + " / " + month + " / " + year + " <br />" + currentSeason;
 }
 
 function doKeyDown(e) {
@@ -706,13 +969,17 @@ function setupBuilding(index)
 		(b.buildings[index].cost < money)
 	)
 	{
-		money -= b.buildings[index].cost;
-		setResources();
+
 		
 		var b_ = b.buildings[index];
 		var build = new Building(b_.name, b_.type, b_.buildTime, b_.buildOn, b_.countHomes, b_.life, b_.cost, b_.workON, b_.workers, b_.countWorkers, b_.consumption, b_.profit, selectedX, selectedY);
+		
+		
 		animateFade( build );
-		setTimeout(function() { build.changeStatus("build"); buildings_.push(build); }, 1000);
+		
+		
+		
+		setTimeout(function() { build.changeStatus("build");  buildings_.push(build); money -= b.buildings[index].cost; setResources(); }, 1000);
 	}
 }
 
@@ -790,13 +1057,36 @@ function makeEvents()
 {
 	//if getRandomInt(min, max)
 	
-	if ( (currentTime % 30 == 0) && currentTime >= 30) noWorkingPeople += getRandomInt(0, 20);
+	if ( day == 30) 
+	{
+		var c = getRandomInt(0, 20);
+		if (c + noWorkingPeople <= countHomes)
+			noWorkingPeople += c;
+		else
+			noWorkingPeople = countHomes;
+		
+		log("На остров прибыло " + c + " человек");
+	}
 	
+}
+
+function setCountHomes()
+{
+	var count = 0;
+	buildings_.forEach(
+		function(element) 
+		{
+			if (element.status == "work")
+				count += element.countHomes;
+		}
+	); 
+	countHomes = count;
 }
 
 function update()
 {
 	makeEvents();
+	setCountHomes();
 	buildings_.forEach(
 		function(element) 
 		{
