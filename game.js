@@ -112,6 +112,7 @@ var b = {
 			"profit": [0, 0, 0, 0, 0, 0, 0, 0, 0],
 			"workers": 0,
 			"countWorkers": 0,
+			"description": "<ul><li><h4>Название:</h4><p>Город</p></li><li><h4>Стоимость:</h4><p>1 450 000</p></li><li><h4>Строится:</h4><p>30 дней</p></li><li><h4>Жилье:</h4><p>+50</p></li></ul>",
 			"x": -1,
 			"y": -1,
 			"opacity": 0.1
@@ -121,8 +122,8 @@ var b = {
 			"type": 2,
 			"buildTime": 8,
 			"buildOn": 0,
-			"countHomes": 0,
-			"life": 8640,
+			"countHomes": 0, 
+			"life": 8640, //8640
 			"cost": 19814,
 			"status": "build",
 			"workON": ["summer", "autumn", "winter"],
@@ -130,6 +131,7 @@ var b = {
 			"countWorkers": 0,
 			"consumption": [0, 0, 0, 0, 0, 0, 2, 0, 0],
 			"profit": [0, 32, 0, 0, 0, 0, 0, 0, 0],
+			"description": "<ul><li><h4>Название:</h4><p>Ферма</p></li><li><h4>Стоимость:</h4><p>19 814</p></li><li><h4>Строится:</h4><p>8 дней</p></li><li><h4>Работает:</h4><p>Весна, лето, осень</p></li><li><h4>Рабочие:</h4><p>5 человек</p></li><li><h4>Потребление:</h4><p>Вода -2</p></li><li><h4>Производит:</h4><p>Еда +32</p></li></ul>",
 			"x": -1,
 			"y": -1,
 			"opacity": 0.1
@@ -148,6 +150,7 @@ var b = {
 			"countWorkers": 0,
 			"consumption": [0, 0, 0, 0, 0, 0, 1, 0, 0],
 			"profit": [0, 18, 0, 0, 0, 0, 0, 0, 0],
+			"description": "<ul><li><h4>Название:</h4><p>Сад</li><li><h4>Стоимость:</h4><p>7640</p></li><li><h4>Строится:</h4><p>20 дней</p></li><li><h4>Работает:</h4><p>Лето, осень</p></li><li><h4>Рабочие:</h4><p>2 человека</p></li><li><h4>Потребление:</h4><p>Вода -1</p></li><li><h4>Производит:</h4><p>Еда +18</p></li></ul>",
 			"x": -1,
 			"y": -1,
 			"opacity": 0.1
@@ -166,6 +169,7 @@ var b = {
 			"countWorkers": 0,
 			"consumption": [0, 0, 0, 0, 0, 0, 0, 0, 0],
 			"profit": [0, 0, 0, 0, 0, 0, 7, 0, 0],
+			"description": "<ul><li><h4>Название:</h4><p>Сад</li><li><h4>Стоимость:</h4><p>7640</p></li><li><h4>Строится:</h4><p>20 дней</p></li><li><h4>Работает:</h4><p>Лето, осень</p></li><li><h4>Рабочие:</h4><p>2 человека</p></li><li><h4>Потребление:</h4><p>Вода -1</p></li><li><h4>Производит:</h4><p>Еда +18</p></li></ul>",
 			"x": -1,
 			"y": -1,
 			"opacity": 0.1
@@ -500,6 +504,49 @@ var b = {
 var buildings_ = [];
 var mapArray;
 
+function getNameResources(arr, sign)
+{
+	var resName = ["Золото", "Еда", "Уголь", "Железо", "Нефть", "Камень", "Вода", "Дерево", "Электричество"];
+	var r = [];
+	var s = '';
+	arr.forEach(
+		function(element, index) 
+		{
+			if (element != 0)
+			r.push(resName[index] + ": " + sign + element);
+		}
+	); 
+	if (r.length == 0) r.push("Ничего");
+	return r.join();
+}
+
+function getNameSeasons(arr)
+{
+	var a = arr;
+	var b = new Array();
+	a.forEach(function(item, i) 
+	{ 
+		if (item == "winter") b[i] = "Зима"; 
+		if (item == "summer") b[i] = "Лето"; 
+		if (item == "autumn") b[i] = "Осень"; 
+		if (item == "spring") b[i] = "Весна"; 
+	});
+	
+	return b.join();
+}
+
+function getDescription(b)
+{				
+	return "<ul><li><h4>Название:</h4><p>" + b.name + 
+	"</p></li><li><h4>Стоимость:</h4><p>" + b.cost + 
+	"</p></li><li><h4>Строится:</h4><p>" + b.buildTime + 
+	" дней</p></li><li><h4>Работает:</h4><p>" + getNameSeasons(b.workON) + 
+	"</p></li><li><h4>Рабочие:</h4><p>" + b.workers + 
+	" человек</p></li><li><h4>Потребление:</h4><p>" + getNameResources(b.consumption, "-") + 
+	"</p></li><li><h4>Производит:</h4><p>" + getNameResources(b.profit, "+") + 
+	" </p></li></ul>";
+}
+
 function log( s )
 {
 	var p = document.createElement('p');
@@ -534,16 +581,27 @@ Building.prototype = {
 				this.changeStatus("work");
 			else
 				this.buildTime -=1;
+				
+		this.life -= 1;
+		if (this.life == 0) this.changeStatus("death");
+		if (this.life < 90) this.drawFire();
 	},
 	changeStatus: function ( status ) {
 		
 		this.status = status;
 		this.drawStatus();
 		
+		if (this.status == "death")
+		{
+			ctxBuildings.clearRect(this.x * tileWidth, this.y * tileHeight, 25, 25);
+			this.x = -1;
+			this.y = -1;
+		}
+		
 	},
 	work: function()
 	{
-		if (this.status != "build") 
+		if (this.status != "build" && this.status != "death") 
 		{
 			if (this.workOn.indexOf(currentSeason) == -1)
 				{
@@ -551,9 +609,7 @@ Building.prototype = {
 				}
 			else
 				this.changeStatus("work");
-				
-			console.log(this.workOn);
-		
+					
 			if ( this.countWorkers == 0 && this.status != "freeze")
 				if  (noWorkingPeople >= this.workers)
 				{
@@ -564,7 +620,7 @@ Building.prototype = {
 				}
 				else
 				{
-					log( noWorkingPeople + " " +  this.workers + " " + this.name);
+					//log( noWorkingPeople + " " +  this.workers + " " + this.name);
 					this.changeStatus("no_people");
 				}
 				
@@ -656,9 +712,40 @@ Building.prototype = {
 			ctxBuildings.stroke();
 		}
 		
+		if (this.status == "death")
+		{
+			ctxBuildings.beginPath();
+			ctxBuildings.arc( this.x * tileWidth + 20, this.y * tileHeight + 20, 3, 0, 2 * Math.PI, false);
+			ctxBuildings.fillStyle = 'black';
+			ctxBuildings.fill();
+			ctxBuildings.lineWidth = 1;
+			ctxBuildings.strokeStyle = '#003300';
+			ctxBuildings.stroke();
+		}
 		
 		
+		
+	},
+	drawFire: function()
+	{
+		/*ctxBuildings.beginPath();
+		var Gradient = ctxBuildings.createRadialGradient(this.x + 12, this.y + 12, 1 ,this.x + 12,this.y + 12, 11);
+		Gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+		Gradient.addColorStop(1, "rgba(0, 255, 0, 1)");
+		ctxBuildings.fillStyle = Gradient;
+		ctxBuildings.arc( this.x * tileWidth + 12, this.y * tileWidth  + 12, 12, 0, 2*Math.PI);
+		ctxBuildings.fill();
+		//ctxBuildings.strokeStyle = '#003300';
+		//ctxBuildings.stroke();
+		ctxBuildings.closePath();*/
+		ctxBuildings.beginPath();
+		ctxBuildings.arc( this.x * tileWidth + 12, this.y * tileWidth  + 12, 12, 0, 2*Math.PI);
+		ctxBuildings.strokeStyle = 'red';
+		ctxBuildings.stroke();
+		ctxBuildings.closePath();
 	}
+
+	
 };
 
 function getRandomInt(min, max) {
@@ -736,15 +823,13 @@ function init()
 
 	var X = parseInt(x / 25);
 	var Y = parseInt(y / 25);
-	
-	log(event.pageX + " " + event.pageY);
+
 	tooltip.style.left = event.pageX + "px";
     tooltip.style.top = event.pageY + 40 + "px";
     tooltip.style.position = "absolute";
-	tooltip.style.width = 200 + "px";
-	tooltip.style.height = 50 + "px";
+	tooltip.style.width = "auto";
 	tooltip.style.display = "block";
-	tooltip.innerHTML = "<p>" + b.buildings[X + 1].name + "</p>";
+	tooltip.innerHTML = getDescription(b.buildings[X + 1]);
 	
 
 	}, false);
@@ -800,7 +885,7 @@ function drawBorder()
 	}
 	
 	//ctxBackground.quadraticCurveTo(150,0,200,10);
-
+	
 	ctxBackground.strokeStyle = 'black';
 	ctxBackground.closePath();
 	ctxBackground.stroke();
@@ -1088,10 +1173,14 @@ function update()
 	makeEvents();
 	setCountHomes();
 	buildings_.forEach(
-		function(element) 
+		function(element, index) 
 		{
-			element.checkStatus();
-			element.work();
+			if (element.status != "death")
+			{
+				element.checkStatus();
+				element.work();
+			}
+
 		}
 	); 
 	
