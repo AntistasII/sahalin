@@ -1,6 +1,6 @@
 body
 {
-	background: rgb(133, 207, 228);
+	background: black; 
 }
 
 #buildings_map
@@ -8,18 +8,18 @@ body
 	background: #FFF;
 	display: block;
 	position: fixed;
-	top: 40px;
-	left: 30%;
+	top: 53px;
+	left: 9px;
 	cursor: pointer;
 }
 
-#background
+#background2
 {
 	position: fixed;
 	top: 120px;
 	left: calc(30% - 50px);
 	/*background: rgb(230, 234, 147);*/
-	/*border: 1px solid black;*/
+	border: 1px solid black;
 }
 
 .canvas
@@ -29,26 +29,60 @@ body
 	overflow: scroll;
 }
 
+/**/
+#wrapper
+{
+	background: rgb(133, 207, 228);
+	display: block;
+	position: relative;
+	top: 70px;
+	left: 0px;
+	border: 1px solid black;
+}
+
 #map, #buildings, #cursor
 {
-	background: transparent;
-	display: block;
-	position: fixed;
-	top: 170px;
-	left: 30%;
+	position: absolute;
 }
 
 #tooltip
 {
-	border: 1px solid black;
-	background: #FFF;
+	border: 1px solid #ffd453;
+	background: #fffda3;
 	color: black;
+	padding: 5px;
+    font-family: Arial, sans-serif;
+	border-radius: 10px;
+	height: auto;
+	display: none;
+	z-index: 20;
+}
+
+#tooltip ul
+{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#tooltip p, #tooltip h4
+{
+	line-height: 12px;
+	height: 12px;
 }
 
 #tooltip p
 {
 	margin-left: 5px;
 	padding-left: 5px;
+	display: inline-block;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+#tooltip h4
+{
+	display: inline;
 }
 
 #stats
@@ -56,6 +90,9 @@ body
 	background: #FFF;
 	color: #000;
 	width: 200px;
+	position: fixed;
+	top: 78px;
+	left: 510px;
 }
 
 #events
@@ -65,4 +102,17 @@ body
 	overflow: scroll;
 	background: #FFF;
 	color: #000;
+	position: fixed;
+	left: 710px;
+	top: 78px;
+}
+
+#info
+{
+	height: 40px;
+	position: fixed;
+	top: 580px;
+	left: 8px;
+	background: white;
+	width: 500px;
 }
