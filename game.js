@@ -96,6 +96,10 @@ Building.prototype = {
 			ctxBuildings.clearRect(this.x * tileWidth, this.y * tileHeight, 25, 25);
 			this.x = -1;
 			this.y = -1;
+			workingPeople -= this.countWorkers;
+			noWorkingPeople += this.countWorkers;
+			this.countWorkers = 0;
+			this.workers = 0;
 		}
 		
 	},
@@ -716,13 +720,60 @@ function makeEvents()
 	if ( day == 30) 
 	{
 		var c = getRandomInt(0, 20);
-		if (c + noWorkingPeople <= countHomes)
+		if ( (c + noWorkingPeople) <= (countHomes - workingPeople))
 			noWorkingPeople += c;
 		else
-			noWorkingPeople = countHomes;
+			noWorkingPeople = (countHomes - workingPeople);
 		
 		log("На остров прибыло " + c + " человек");
 	}
+	
+	if (getRandomInt(0, 1000) > 990)
+	{
+		var l = buildings_.length;
+		var b = getRandomInt(0, l);
+		if (buildings_[b].status != "build" && buildings_[b].status != "death")
+		{
+			var damage = getRandomInt(0, buildings_[b].life);
+			if (buildings_[b].countWorkers > 0)
+			{
+				workingPeople -= buildings_[b].countWorkers;
+				buildings_[b].countWorkers = 0;
+			}
+			
+			
+			buildings_[b].life -= damage;
+			log("В здании " + buildings_[b].name + " взорвалась какая-то хрень. Все работники умерли. Здание получило урон: " + damage);
+		}
+		
+	}
+	
+	if (getRandomInt(0, 1000) > 980)
+	{
+		var l = buildings_.length;
+		var b = getRandomInt(0, l);
+		var s = '';
+		var resName = ["Золото", "Еда", "Уголь", "Железо", "Нефть", "Камень", "Вода", "Дерево", "Электричество"];
+		if (buildings_[b].status == "work")
+		{
+			buildings_[b].profit.forEach(
+				function(element, index) 
+				{
+					if (element != 0)
+						{
+							var res = getRandomInt(element * 20, element * 30);
+							resources[index] += res;
+							s += resName[index] + ": +" + res;
+						}
+				}
+			); 
+			if (s != '')
+				log("В здании " + buildings_[b].name + " случилось нечто неожиоданное. " + s);
+		}
+			
+	}
+	
+	
 	
 }
 
